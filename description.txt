@@ -1,1 +1,3 @@
-This tool is designed solely for answering questions related to the content of your uploaded resume. Please use it to inquire specifically about the details and information contained within your document.
+**Tool Instruction:**
+
+Use this tool to answer questions about the content in "My Resume" only. This tool should be used when the user asks about information, details, or specific content contained within the uploaded resume document. Do not use this tool for general questions unrelated to the resume content.

@@ -8,7 +8,7 @@ from langchain_core.prompts import PromptTemplate
 from langgraph.constants import START, END
 from langgraph.graph.state import StateGraph
 
-from src.rag.reAct_agent import agent_executor
+from src.rag.reAct_agent import get_agent_executor
 from src.rag.retriever_setup import get_retriever
 from src.config.settings import Config
 from src.llms.openai import llm
@@ -74,25 +74,13 @@ def retriever_node(state: State):
         state (State): The current state of the graph.
 
     Returns:
-        dict: Updated messages with tool calls.
+        dict: Updated messages with retrieved content.
     """
-    messages = state["latest_query"]
-    result = agent_executor.invoke({"input": messages})
+    query = state["latest_query"]
+    result = get_agent_executor().invoke({"messages": [{"role": "user", "content": query}]})
 
-    # Extract tool calls
-    intermediate_steps = result.get("intermediate_steps", [])
-    tool_calls = []
-    if intermediate_steps:
-        for action, tool_result in intermediate_steps:
-            tool_calls.append({
-                "tool": action.tool,
-                "input": action.tool_input,
-            })
-
-    new_message = AIMessage(
-        content=result["output"],
-        additional_kwargs={"tool_calls": tool_calls},
-    )
+    output = result["messages"][-1].content
+    new_message = AIMessage(content=output)
 
     return {
         "messages": [new_message]

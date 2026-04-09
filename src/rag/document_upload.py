@@ -5,7 +5,6 @@ Document upload and processing module.
 import os
 import tempfile
 
-from fastapi import UploadFile, File
 from langchain_community.document_loaders import PyPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
@@ -13,7 +12,7 @@ from src.rag.retriever_setup import retriever_chain
 from src.tools.common_tools import enhance_description_with_llm
 
 
-def documents(description: str, file: UploadFile = File(...)):
+def documents(description: str, filename: str, file_bytes: bytes):
     """
     Process and upload a document for RAG.
 
@@ -22,7 +21,8 @@ def documents(description: str, file: UploadFile = File(...)):
 
     Args:
         description: User-provided document description.
-        file: The uploaded file (PDF or TXT).
+        filename: Original filename of the uploaded file.
+        file_bytes: Raw bytes of the uploaded file.
 
     Returns:
         Boolean indicating success of the upload process.
@@ -30,7 +30,6 @@ def documents(description: str, file: UploadFile = File(...)):
     Raises:
         HTTPException: If file type is not supported or loading fails.
     """
-    filename = file.filename
     print(filename)
     if not filename.endswith(".pdf") and not filename.endswith(".txt"):
         from fastapi import HTTPException
@@ -38,8 +37,6 @@ def documents(description: str, file: UploadFile = File(...)):
             status_code=400,
             detail="Only PDF and TXT files are supported"
         )
-
-    file_bytes = file.file.read()
 
     with tempfile.NamedTemporaryFile(
         delete=False,
@@ -62,7 +59,11 @@ def documents(description: str, file: UploadFile = File(...)):
             detail=f"Error loading file: {e}"
         )
     finally:
-        os.unlink(tmp_path)
+        del loader  # Release pypdf file handle before unlinking (required on Windows)
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
 
     # Enhance description using LLM
     description_llm = enhance_description_with_llm(description)

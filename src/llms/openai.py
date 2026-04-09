@@ -1,13 +1,16 @@
 """
-OpenAI LLM initialization and configuration.
+Anthropic Claude LLM initialization and configuration.
 """
 
 import os
 
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 
 load_dotenv()
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
+os.environ["ANTHROPIC_API_KEY"] = os.getenv("ANTHROPIC_API_KEY", "")
 
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatAnthropic(
+    model="claude-sonnet-4-5",
+    temperature=0
+)

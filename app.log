@@ -1,0 +1,7 @@
+2026-03-24 14:40:38,856 - INFO - Calling /init, status code: {'detail': 'Not Found'}
+2026-03-24 14:48:01,890 - INFO - Calling /init, status code: {'detail': 'Not Found'}
+2026-03-24 15:02:54,748 - INFO - Calling /init, status code: {'detail': 'Not Found'}
+2026-03-24 15:03:19,547 - INFO - Calling /init, status code: {'detail': 'Not Found'}
+2026-04-05 21:11:07,803 - INFO - API Token received: local_session_001
+2026-04-05 21:11:09,846 - INFO - Calling /create_user, status code: 404
+2026-04-05 21:11:09,846 - ERROR - Create user failed: 404 - {"detail":"Not Found"}

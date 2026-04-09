@@ -3,6 +3,7 @@ API routes for RAG operations.
 """
 
 from fastapi import APIRouter, UploadFile, File, Header
+from fastapi.concurrency import run_in_threadpool
 from langchain_core.messages import HumanMessage, AIMessage
 
 from src.memory.chat_history_mongo import ChatHistory
@@ -30,7 +31,7 @@ async def rag_query(req: QueryRequest):
 
     # Fetch full history
     messages = await chat_history.get_messages()
-    result = builder.invoke({
+    result = await run_in_threadpool(builder.invoke, {
         "messages": messages
     })
     output_text = result["messages"][-1].content
@@ -38,7 +39,7 @@ async def rag_query(req: QueryRequest):
     # Save assistant message
     await chat_history.add_message(AIMessage(content=output_text))
 
-    return {"result": result["messages"][-1]}
+    return {"result": {"content": output_text}}
 
 
 @router.post("/rag/documents/upload")
@@ -56,6 +57,7 @@ async def upload_file(
     Returns:
         Upload status.
     """
-    status_upload = documents(description, file)
+    file_bytes = await file.read()
+    status_upload = await run_in_threadpool(documents, description, file.filename, file_bytes)
     return {"status": status_upload}
 
